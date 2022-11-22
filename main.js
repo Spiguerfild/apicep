@@ -1,19 +1,46 @@
-const form_consultar_cep = document.querySelector('#consultarCep')
-const input_cep = form_consultar_cep.cep 
-const div_dados = document.querySelector('#dados')
+import '@picocss/pico'
+import './style.css'
+const formConsultarCep = document.querySelector('#consultarCep')
+const inputCep = formConsultarCep.cep // seleciona o input do cep a partir do formulário
+const divDados = document.querySelector('#dados')
+const btnConsultarCep =
+  document.querySelector('#btnConsultarCep')
+/* const loader =
+  `<a href="#" aria-busy="true">
+    Consultando CEP, aguarde...
+  </a>` */
 
-form_consultar_cep.addEventListener('submit',function(event){
-  event.preventDefault() // anula o comportamento padrao de envio do form
-  consultar_cep(input_cep.value)
+formConsultarCep.addEventListener('submit', function (event) {
+  event.preventDefault() // anula comportamento padrão de envio do form ao clicar no botão
+  ativaLoader(true)
+  consultarCep(inputCep.value) // invoca a função passando o cep digitado por parâmetro
 })
 
-async function consultar_cep(cep){
-let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
-let dados_cep = await response.json()  
-div_dados.innerHTML = `
-<p>Endereço: ${dados_cep.logradouro} </p>
-<p>Localidade: ${dados_cep.localidade} </p>
-
-`
+async function consultarCep(cep) {
+  let response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+  let dadosCep = await response.json()
+  if (dadosCep.erro) {
+    divDados.innerHTML = `
+      <div class="erro">CEP não encontrado!</div>
+    `
+  } else {
+    divDados.innerHTML = `
+    <p> Endereço: ${dadosCep.logradouro}  </p>
+    <p> Localidade: ${dadosCep.localidade}  </p>
+  `
+  }
+  ativaLoader(false)
 }
-consultar_cep()
+
+function ativaLoader(ativo) {
+  if (ativo) {
+    btnConsultarCep.
+      setAttribute('aria-busy', 'true')
+    btnConsultarCep.
+      textContent = 'Consultando CEP...'
+  } else {
+    btnConsultarCep.removeAttribute('aria-busy')
+    btnConsultarCep.
+      textContent = 'Consultar'
+  }
+}
